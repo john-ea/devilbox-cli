@@ -1,0 +1,31 @@
+{
+    "name": "devilbox-cli",
+    "version": "0.2.3",
+    "description": "A simple and conveniant command line to manage devilbox from anywhere",
+    "author": "Louis Gabriel <code@louisgab.me>",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/louisgab/devilbox-cli/issues"
+    },
+    "homepage": "https://github.com/louisgab/devilbox-cli",
+    "bin": {
+        "devilbox": "./dist/devilbox-cli.sh"
+    },
+    "scripts": {
+        "clean": "./bin/clean.sh",
+        "lint": "./bin/lint.sh",
+        "build": "./bin/build.sh",
+        "prepare": "npm run clean && npm run lint && npm run build"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/louisgab/devilbox-cli.git"
+    },
+    "keywords": [
+        "devilbox",
+        "docker",
+        "lamp",
+        "bash",
+        "cli"
+    ]
+}
