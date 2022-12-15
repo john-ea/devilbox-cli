@@ -24,15 +24,18 @@ main () {
         case $1 in
             check) shift; check_command;;
             c|config) shift; config_command "$@";;
+            ps|status|--status) shift; status_command;;
             e|enter) shift; enter_command;;
             x|exec) shift; exec_command "$@";;
             h|help|-h|--help) shift; help_command;;
             mysql) shift; mysql_command "$@";;
             o|open) shift; open_command "$@";;
             restart) shift; restart_command "$@";;
-            r|run) shift; run_command "$@";;
-            s|stop) shift; stop_command;;
-            u|update) shift; update_command;;
+            r|run|up) shift; run_command "$@";;
+            s|stop) shift; stop_command "$@";;
+            d|down) shift; down_command "$@";;
+            rm|remove) shift; remove_command "$@";;
+            u|update) shift; update_command "$@";;
             v|version|-v|--version) shift; version_command;;
             *) error "Unknown command $arg, see -h for help.";;
         esac

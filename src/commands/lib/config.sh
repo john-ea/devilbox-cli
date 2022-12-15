@@ -3,8 +3,11 @@
 get_config () {
     local config=$1
     local current
-    current=$(grep -Eo "^$config+[[:alnum:][:punct:]]*" "$ENV_FILE" | sed "s/.*$config//g")
-    if was_success && [ ! -z "$current" ] ;then
+    if ! is_variable_existing "$config"; then
+        return "$KO_CODE"
+    fi
+    current=$(grep -Eo "^$config+[[:print:]]*" "$ENV_FILE" | sed "s/.*$config//g")
+    if was_success ;then
         printf "%s" "$current"
         return "$OK_CODE"
     else
@@ -16,11 +19,13 @@ set_config () {
     local config=$1
     local new=$2
     local current
-    current="$(get_config "$config")"
+    current=$(get_config "$config")
     if was_error; then
         return "$KO_CODE"
     fi
-    sed -i -e "s/\(^#*$config${current//\//\\\/}\).*/$config${new//\//\\\/}/" "$ENV_FILE"
+    local safe_current=$(printf "%s" "$current" | sed 's/[^[:alnum:]]/\\&/g')
+    local safe_new=$(printf "%s" "$new" | sed 's/[^[:alnum:]]/\\&/g')
+    sed -i -e "s/\(^#*$config$safe_current\).*/$config$safe_new/" "$ENV_FILE"
     if was_error; then
         return "$KO_CODE"
     fi

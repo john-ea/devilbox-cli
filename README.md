@@ -35,7 +35,7 @@ npm install -g devilbox-cli
 If installed successfully, you should see something like this when you run `devilbox -v`:
 
 ```sh
-devilbox-cli v0.4.1 (2020-12-06)
+devilbox-cli v0.4.2 (2022-12-15)
 A simple and conveniant cli to manage devilbox from anywhere
 https://github.com/louisgab/devilbox-cli
 ```
@@ -61,12 +61,14 @@ devilbox-cli provides all basic command to manage your installation:
 ```sh
 devilbox check   # Check your .env
 devilbox config  # Get and set variables on your .env
+devilbox status  # Show status the current stack
 devilbox enter   # Enter the php container with shell.sh script
 devilbox exec    # Execute a command in the container
 devilbox mysql   # Execute a command in the container
 devilbox open    # Open the devilbox intranet
 devilbox run     # Start the containers
 devilbox stop    # Stop all containers
+devilbox down    # Stop all containers and removes containers, networks, volumes, and images created by up or start
 devilbox restart # Stop and rerun all containers
 devilbox update  # Update to latest devilbox version
 ```
@@ -74,10 +76,14 @@ devilbox update  # Update to latest devilbox version
 To see containers current versions defined in devilbox `.env` file, use the `config` command:
 
 ```sh
-devilbox config --apache --php --mysql
-# [!] Apache current version is 2.4
-# [!] PHP current version is 7.2
-# [!] MySql current version is 5.6
+devilbox config --httpd --php --mysql --pgsql --redis --memcached --mongo
+# [!] Httpd current version is nginx-stable
+# [!] PHP current version is 8.1
+# [!] MySql current version is mariadb-10.6
+# [!] PostgreSQL current version is 14-alpine
+# [!] Redis current version is 6.2-alpine
+# [!] Memcached current version is 1.6-alpine
+# [!] MongoDB current version is 5.0
 ```
 
 It can also list available versions of any container:
@@ -85,17 +91,33 @@ It can also list available versions of any container:
 ```sh
 devilbox config --mysql=*
 # [!] MySql available versions:
-# 5.5
-# 5.6
-# 5.7
-# 8.0
+# mysql-5.5
+# mysql-5.6
+# mysql-5.7
+# mysql-8.0
+# percona-5.5
+# percona-5.6
+# percona-5.7
+# percona-8.0
+# mariadb-5.5
+# mariadb-10.0
+# mariadb-10.1
+# mariadb-10.2
+# mariadb-10.3
+# mariadb-10.4
+# mariadb-10.5
+# mariadb-10.6
+# mariadb-10.7
+# mariadb-10.8
+# mariadb-10.9
+# mariadb-10.10
 ```
 
 And of course, it can change any version:
 
 ```sh
-devilbox config --php=8.0
-# [✔] PHP version updated to 8.0
+devilbox config --php=8.2
+# [✔] PHP version updated to 8.2
 ```
 
 You can also point devilbox to your projects folder:
@@ -112,7 +134,7 @@ And if you dont remember a command, `devilbox help` is your best friend :)
 By default, the `run` command will start the default LAMP stack containers `php httpd mysql`. The command can be customized by configuring your desired services via the `$DEVILBOX_CONTAINERS` variable. For example, if you'd like to also run the NOSQL stack, you would define the following:
 
 ```sh
-export DEVILBOX_CONTAINERS="php httpd mysql redis memcd mongo"
+export DEVILBOX_CONTAINERS="php httpd mysql pgsql redis memcd mongo"
 ```
 
 Then reload your terminal or run `source ~/.zshrc` if you use zsh.

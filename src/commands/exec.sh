@@ -4,5 +4,5 @@ exec_command() {
         return "$KO_CODE"
     fi
 
-    docker-compose exec -u devilbox php bash -c "$@"
+    $DOCKER_COMPOSE exec -u devilbox php bash -c "$@"
 }

@@ -3,6 +3,13 @@ stop_command () {
         error "Devilbox containers are not running"
         return "$KO_CODE"
     fi
-    docker-compose stop
-    docker-compose rm -f
+    if [[ $# -eq 0 ]] ; then
+        $DOCKER_COMPOSE stop
+    else
+        for arg in "$@"; do
+            case $arg in
+                -r|--remove) $DOCKER_COMPOSE stop; $DOCKER_COMPOSE rm -f; shift;;
+            esac
+        done
+    fi
 }

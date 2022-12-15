@@ -4,7 +4,7 @@ is_choice_existing () {
     local config=$1
     local choice=$2
     local search
-    search=$(grep -Eo "^#*$config$choice" "$ENV_FILE")
+    search=$(grep -Eo "^#*$config$choice$" "$ENV_FILE")
     if was_success && [ ! -z "$search" ] ;then
         return "$OK_CODE"
     else
@@ -15,7 +15,7 @@ is_choice_existing () {
 get_current_choice () {
     local config=$1
     local current
-    current=$(grep -Eo "^$config+[.[:digit:]]*" "$ENV_FILE" | sed "s/.*$config//g")
+    current=$(grep -Eo "^$config+[[:print:]]*" "$ENV_FILE" | sed "s/.*$config//g")
     if was_success && [ ! -z "$current" ] ;then
         printf "%s" "$current"
         return "$OK_CODE"
@@ -39,7 +39,7 @@ is_choice_available() {
 get_all_choices () {
     local config=$1
     local all
-    all=$(grep -Eo "^#*$config+[.[:digit:]]*" "$ENV_FILE" | sed "s/.*$config//g")
+    all=$(grep -Eo "^#*$config+[[:print:]]*" "$ENV_FILE" | sed "s/.*$config//g")
     if was_success && [ ! -z "$all" ] ;then
         printf "%s\n" "$all"
         return "$OK_CODE"
@@ -105,9 +105,9 @@ get_readable_current_choice () {
 }
 
 is_readable_choice_available() {
-    local config=$1
-    local choice=$2
-    local isavailable
+    local type=$1
+    local config=$2
+    local choice=$3
     if is_choice_available "$config" "$choice"; then
         success "$type version $choice is available"
         return "$OK_CODE"
@@ -136,10 +136,13 @@ set_readable_choice () {
     local type=$1
     local config=$2
     local new=$3
+    if ! is_empty "$type" "$new"; then
+        return "$KO_CODE"
+    fi
     if ! is_readable_choice_existing "$type" "$config" "$new"; then
         return "$KO_CODE"
     fi
-    if ! is_readable_choice_available "$config" "$new"; then
+    if ! is_readable_choice_available "$type" "$config" "$new"; then
         return "$KO_CODE"
     fi
     if set_choice "$config" "$new"; then
@@ -148,5 +151,45 @@ set_readable_choice () {
     else
         error "$type version change failed"
         return "$KO_CODE"
+    fi
+}
+
+get_current_choice_version () {
+    local type=$1
+    local config=$2
+    get_readable_current_choice "$type" "$config"
+}
+
+get_all_choice_versions () {
+    local type=$1
+    local config=$2
+    get_readable_all_choices "$type" "$config"
+}
+
+set_choice_version () {
+    local type=$1
+    local config=$2
+    local new=$3
+    set_readable_choice "$type" "$config" "$new"
+}
+
+is_choice () {
+    local config=$1
+    local all=$(grep --max-count=2 -Ec "^[#]*$config+[[:print:]]*" "$ENV_FILE")
+    if was_success && [[ $all -gt 1 ]] ; then
+        return "$OK_CODE"
+    else
+        return "$KO_CODE"
+    fi
+}
+
+is_empty () {
+    local type=$1
+    local choice=$2
+    if [ ! -z "$choice" ] ; then
+         return "$OK_CODE"
+    else
+        error "$type variable can't be empty"
+        return "$K0_CODE"
     fi
 }
