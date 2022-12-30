@@ -52,16 +52,16 @@ get_composes() {
 }
 
 add_composes() {
-    local pattern="(${DEVILBOX_COMPOSE_DIR}${DEVILBOX_COMPOSE_FILE_PATTERN}${1//[ ,]/})$|(${DEVILBOX_COMPOSE_DIR}${DEVILBOX_COMPOSE_FILE_PATTERN}})$"
-    current=$(get_config "$COMPOSE_FILE_CONFIG")
-    current=$(printf "%s\n" ${current//:/ } | grep -Eo ".*${pattern}" | sed "s|${DEVILBOX_COMPOSE_DIR}${DEVILBOX_COMPOSE_FILE_PATTERN}| |g")
+    local pattern="(${DOCKER_COMPOSE_FILE}|${DOCKER_COMPOSE_OVERRIDE_FILE})$|(${DEVILBOX_COMPOSE_DIR}${DEVILBOX_COMPOSE_FILE_PATTERN}${1//[ ,]/)$|(${DEVILBOX_COMPOSE_DIR}${DEVILBOX_COMPOSE_FILE_PATTERN}})$"
+    local current=$(get_config "$COMPOSE_FILE_CONFIG")
+    current=$(printf "%s\n" ${current//:/ } | grep -Ev ".*${pattern}" | sed "s|${DEVILBOX_COMPOSE_DIR}${DEVILBOX_COMPOSE_FILE_PATTERN}| |g")
     set_composes "$current ${1}"
     return "$OK_CODE"
 }
 
 remove_composes() {
-    local pattern="(${DOCKER_COMPOSE_FILE})$|(${DOCKER_COMPOSE_OVERRIDE_FILE})$|(${DEVILBOX_COMPOSE_DIR}${DEVILBOX_COMPOSE_FILE_PATTERN}${1//[ ,]/})$|(${DEVILBOX_COMPOSE_DIR}${DEVILBOX_COMPOSE_FILE_PATTERN}})$"
-    current=$(get_config "$COMPOSE_FILE_CONFIG")
+    local pattern="(${DOCKER_COMPOSE_FILE}|${DOCKER_COMPOSE_OVERRIDE_FILE})$|(${DEVILBOX_COMPOSE_DIR}${DEVILBOX_COMPOSE_FILE_PATTERN}${1//[ ,]/)$|(${DEVILBOX_COMPOSE_DIR}${DEVILBOX_COMPOSE_FILE_PATTERN}})$"
+    local current=$(get_config "$COMPOSE_FILE_CONFIG")
     current=$(printf "%s\n" ${current//:/ } | grep -Ev ".*${pattern}" | sed "s|${DEVILBOX_COMPOSE_DIR}${DEVILBOX_COMPOSE_FILE_PATTERN}| |g")
     set_composes $current
     return "$OK_CODE"
