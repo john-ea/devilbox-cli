@@ -363,21 +363,45 @@ get_composes() {
     return "$OK_CODE"
 }
 
+add_composes() {
+    local pattern="(${DEVILBOX_COMPOSE_DIR}${DEVILBOX_COMPOSE_FILE_PATTERN}${1//[ ,]/})$|(${DEVILBOX_COMPOSE_DIR}${DEVILBOX_COMPOSE_FILE_PATTERN}})$"
+    current=$(get_config "$COMPOSE_FILE_CONFIG")
+    current=$(printf "%s\n" ${current//:/ } | grep -Eo ".*${pattern}" | sed "s|${DEVILBOX_COMPOSE_DIR}${DEVILBOX_COMPOSE_FILE_PATTERN}| |g")
+    set_composes "$current ${1}"
+    return "$OK_CODE"
+}
+
+remove_composes() {
+    local pattern="(${DOCKER_COMPOSE_FILE})$|(${DOCKER_COMPOSE_OVERRIDE_FILE})$|(${DEVILBOX_COMPOSE_DIR}${DEVILBOX_COMPOSE_FILE_PATTERN}${1//[ ,]/})$|(${DEVILBOX_COMPOSE_DIR}${DEVILBOX_COMPOSE_FILE_PATTERN}})$"
+    current=$(get_config "$COMPOSE_FILE_CONFIG")
+    current=$(printf "%s\n" ${current//:/ } | grep -Ev ".*${pattern}" | sed "s|${DEVILBOX_COMPOSE_DIR}${DEVILBOX_COMPOSE_FILE_PATTERN}| |g")
+    set_composes $current
+    return "$OK_CODE"
+}
+
+check_composes () {
+   if ! is_variable_existing "$COMPOSE_PATH_SEPARATOR_CONFIG"; then
+       sed -i -e "$ a \\\n${COMPOSE_PATH_SEPARATOR_CONFIG}" "$ENV_FILE"
+       if was_error; then
+           return "$KO_CODE"
+       fi
+   fi
+   if ! is_variable_existing "$COMPOSE_FILE_CONFIG"; then
+       sed -i -e "$ a ${COMPOSE_FILE_CONFIG}" "$ENV_FILE"
+       if was_error; then
+           return "$KO_CODE"
+       fi
+   fi
+
+   return "$OK_CODE"
+}
+
 set_composes() {
-    local composes=${1// /,}
+    local composes=$(echo ${1} | xargs -n1 | uniq | xargs| sed "s| |,|g")
     composes=$(get_composes_string $composes)
 
-    if ! is_variable_existing "$COMPOSE_PATH_SEPARATOR_CONFIG"; then
-        sed -i -e "$ a \\\n${COMPOSE_PATH_SEPARATOR_CONFIG}" "$ENV_FILE"
-        if was_error; then
-            return "$KO_CODE"
-        fi
-    fi
-    if ! is_variable_existing "$COMPOSE_FILE_CONFIG"; then
-        sed -i -e "$ a ${COMPOSE_FILE_CONFIG}" "$ENV_FILE"
-        if was_error; then
-            return "$KO_CODE"
-        fi
+    if ! check_composes; then
+        return "$KO_CODE"
     fi
 
     set_readable_config "COMPOSE_FILE" "$COMPOSE_FILE_CONFIG" "$composes"
@@ -619,6 +643,8 @@ config_command () {
                 -v=*|--variable=*) get_current_variable_version "${arg#*=}"; shift;;
                 -c=*|--containers=*) set_containers "${arg#*=}"; shift;;
                 -c|--containers) get_containers; shift;;
+                -cs\+=*|--composes\+=*) add_composes "${arg#*=}"; shift;;
+                -cs\-=*|--composes\-=*) remove_composes "${arg#*=}"; shift;;
                 -cs=*|--composes=*) set_composes "${arg#*=}"; shift;;
                 -cs|--composes) get_composes; shift;;
             esac
@@ -698,6 +724,8 @@ help_command () {
     add_usage_arg "-c=<val>,--containers=<val>" "Set containers"
     add_usage_arg "-cs,--composes" "Show composes"
     add_usage_arg "-cs=<val>,--composes=<val>" "Set composes"
+    add_usage_arg "-cs+=<val>,--composes+=<val>" "Add composes"
+    add_usage_arg "-cs-=<val>,--composes-=<val>" "Remove composes"
     add_usage_command "s,status" "Show status the current stack"
     add_usage_command "e,enter" "Enter the devilbox shell"
     add_usage_command "x, exec '<command>'" "Execute a command inside the container without entering it"

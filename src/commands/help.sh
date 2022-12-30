@@ -49,6 +49,8 @@ help_command () {
     add_usage_arg "-c=<val>,--containers=<val>" "Set containers"
     add_usage_arg "-cs,--composes" "Show composes"
     add_usage_arg "-cs=<val>,--composes=<val>" "Set composes"
+    add_usage_arg "-cs+=<val>,--composes+=<val>" "Add composes"
+    add_usage_arg "-cs-=<val>,--composes-=<val>" "Remove composes"
     add_usage_command "s,status" "Show status the current stack"
     add_usage_command "e,enter" "Enter the devilbox shell"
     add_usage_command "x, exec '<command>'" "Execute a command inside the container without entering it"

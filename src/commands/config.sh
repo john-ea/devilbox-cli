@@ -35,6 +35,8 @@ config_command () {
                 -v=*|--variable=*) get_current_variable_version "${arg#*=}"; shift;;
                 -c=*|--containers=*) set_containers "${arg#*=}"; shift;;
                 -c|--containers) get_containers; shift;;
+                -cs\+=*|--composes\+=*) add_composes "${arg#*=}"; shift;;
+                -cs\-=*|--composes\-=*) remove_composes "${arg#*=}"; shift;;
                 -cs=*|--composes=*) set_composes "${arg#*=}"; shift;;
                 -cs|--composes) get_composes; shift;;
             esac
